@@ -60,7 +60,22 @@ lib:	$(LIBOBJ)
 	$(RANLIB) $(LIB) || echo Never mind.
 	@touch lib
 
-shared: lib
+rust_stuff:
+	# Hacky Rust integration
+	@echo "***************  Compiling Rust Src ***************"
+	rustc Rust/t1_lib_export.rs --crate-type=staticlib -o Rust/t1_lib_export_rust.a
+
+	@echo "************  Merging Static Libraries ************"
+	# Cannot simply link (only works with object files) rust static-lib into libssl.a, as this will result in nested symbols
+	# Need to combine both libs to one new static lib
+	# (https://stackoverflow.com/questions/3821916/how-to-merge-two-ar-static-libraries-into-one)
+	cd .. && ar cqT libssl.a_tmp libssl.a ssl/Rust/t1_lib_export_rust.a && echo -e 'create libssl.a_tmp\naddlib libssl.a_tmp\nsave\nend' | ar -M
+	mv ../libssl.a_tmp ../libssl.a
+	@echo "************ * Rust Integration Done! *************"
+
+.PHONY: rust_stuff
+
+shared: lib rust_stuff
 	if [ -n "$(SHARED_LIBS)" ]; then \
 		(cd ..; $(MAKE) $(SHARED_LIB)); \
 	fi
