@@ -26,7 +26,7 @@ GENERAL=Makefile maketests.com \
 DLIBCRYPTO= ../libcrypto.a
 DLIBSSL= ../libssl.a
 LIBCRYPTO= -L.. -lcrypto
-LIBSSL= -L.. -lssl -lpthread -ldl
+LIBSSL= -L.. -lssl -lpthread -ldl -lm
 
 BNTEST=		bntest
 ECTEST=		ectest
