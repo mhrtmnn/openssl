@@ -28,9 +28,9 @@ pub extern "C" fn __tls1_process_heartbeat(ssl: *const u8, data: *const u8, msg_
 	let mut r: i32 = 0;
 	let p: &[u8];
 
-	println!("=== Entering Rust section ===");
+	println!("=== Entering (safe) Rust section ===");
 
-	// unsafe pointer deref
+	// unsafe pointer with unknown validity and lifetime
 	unsafe {
 		p = std::slice::from_raw_parts(data, msg_len as usize);
 	}
@@ -49,11 +49,11 @@ pub extern "C" fn __tls1_process_heartbeat(ssl: *const u8, data: *const u8, msg_
 
 		// unsafe function call via FFI
 		unsafe {
-			r = ssl3_write_bytes(ssl, TLS1_RT_HEARTBEAT, buffer.as_mut_ptr(), (FIELD_TYPE_LEN + FIELD_LENG_LEN + FIELD_PADD_LEN) as i32 + payload as i32);
+			r = ssl3_write_bytes(ssl, TLS1_RT_HEARTBEAT, buffer.as_ptr(), (FIELD_TYPE_LEN + FIELD_LENG_LEN + FIELD_PADD_LEN) as i32 + payload as i32);
 		}
 	}
 
-	println!("=== Leaving Rust Section (code={}) ===", r);
+	println!("=== Leaving (safe) Rust Section (code={}) ===", r);
 	r
 }
 
@@ -65,7 +65,7 @@ pub extern "C" fn __tls1_process_heartbeat_no_bounds_check(ssl: *const u8, data:
 
 	println!("=== Entering (unsafe) Rust section ===");
 
-	// unsafe pointer deref
+	// unsafe pointer with unknown validity and lifetime
 	unsafe {
 		p = std::slice::from_raw_parts(data, msg_len as usize);
 	}
@@ -88,7 +88,7 @@ pub extern "C" fn __tls1_process_heartbeat_no_bounds_check(ssl: *const u8, data:
 
 		// unsafe function call via FFI
 		unsafe {
-			r = ssl3_write_bytes(ssl, TLS1_RT_HEARTBEAT, buffer.as_mut_ptr(), (FIELD_TYPE_LEN + FIELD_LENG_LEN + FIELD_PADD_LEN) as i32 + payload as i32);
+			r = ssl3_write_bytes(ssl, TLS1_RT_HEARTBEAT, buffer.as_ptr(), (FIELD_TYPE_LEN + FIELD_LENG_LEN + FIELD_PADD_LEN) as i32 + payload as i32);
 		}
 	}
 
