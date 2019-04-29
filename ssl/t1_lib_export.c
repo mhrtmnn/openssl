@@ -10,7 +10,9 @@
 /* SETUP */
 #define ORIG 1
 #define RUST 2
-#define MODE RUST
+#define RUST_UNSAFE 3
+
+#define MODE RUST_UNSAFE
 
 
 /*******************************************************************************
@@ -122,10 +124,11 @@ int tls1_process_heartbeat(SSL *s)
 /*******************************************************************************
  * The exported Rust Function
  *******************************************************************************/
-#if MODE == RUST
+#if (MODE == RUST || MODE == RUST_UNSAFE)
 
 /* implemented in Rust */
 extern int __tls1_process_heartbeat(void *s, unsigned char *p, unsigned int msg_len);
+
 
 /* simple wrapper to avoid having to reinplement the very complex struct SSL */
 int tls1_process_heartbeat(SSL *s)
@@ -133,7 +136,11 @@ int tls1_process_heartbeat(SSL *s)
 	unsigned char *p = &s->s3->rrec.data[0];
 	unsigned int msg_len = s->s3->rrec.length;
 
+#if MODE == RUST
 	return __tls1_process_heartbeat(s, p, msg_len);
+#else
+	return __tls1_process_heartbeat_no_bounds_check(s, p, msg_len);
+#endif
 }
 
 #endif
