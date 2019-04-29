@@ -30,7 +30,7 @@ pub extern "C" fn __tls1_process_heartbeat(ssl: *const u8, data: *const u8, msg_
 
 	println!("=== Entering Rust section ===");
 
-	/* unsafe pointer deref */
+	// unsafe pointer deref
 	unsafe {
 		p = std::slice::from_raw_parts(data, msg_len as usize);
 	}
@@ -45,14 +45,12 @@ pub extern "C" fn __tls1_process_heartbeat(ssl: *const u8, data: *const u8, msg_
 		buffer.extend_from_slice(&p[3..3 + payload as usize]);
 		buffer.extend_from_slice(&rand::thread_rng().gen::<[u8; FIELD_PADD_LEN]>());
 
-		println!("Payload claims to be of len {}, actual len {}", payload, msg_len);
+		println!("Payload claims to be of len {}, message len {}", payload, msg_len);
 
+		// unsafe function call via FFI
 		unsafe {
 			r = ssl3_write_bytes(ssl, TLS1_RT_HEARTBEAT, buffer.as_mut_ptr(), (FIELD_TYPE_LEN + FIELD_LENG_LEN + FIELD_PADD_LEN) as i32 + payload as i32);
 		}
-
-		// prevent Rust from freeing the buffer on function / scope end
-		std::mem::forget(buffer);
 	}
 
 	println!("=== Leaving Rust Section (code={}) ===", r);
