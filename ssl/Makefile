@@ -18,7 +18,7 @@ GENERAL=Makefile README ssl-lib.com install.com
 TEST=ssltest.c
 APPS=
 
-LIB=$(TOP)/libssl.a
+LIB=$(TOP)/libssl.a_orig
 SHARED_LIB= libssl$(SHLIB_EXT)
 LIBSRC=	\
 	s2_meth.c   s2_srvr.c s2_clnt.c  s2_lib.c  s2_enc.c s2_pkt.c \
@@ -58,7 +58,6 @@ all:	shared
 lib:	$(LIBOBJ)
 	$(AR) $(LIB) $(LIBOBJ)
 	$(RANLIB) $(LIB) || echo Never mind.
-	cp ../libssl.a ../libssl.a_orig
 	@touch lib
 
 rust_stuff:
