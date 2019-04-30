@@ -30,14 +30,6 @@ int tls1_process_heartbeat(SSL *s)
 	unsigned int payload;
 	unsigned int padding = 16; /* Use minimum padding */
 
-	fprintf(stderr, "%s: I AM HERE!\n", __func__);
-
-	if (s->msg_callback)
-		fprintf(stderr, "%s: CALLBACK PRESENT!\n", __func__);
-	else
-		fprintf(stderr, "%s: CALLBACK NOT! PRESENT!\n", __func__);
-
-
 #ifdef VULN
 	/* Read type and payload length first */
 	hbtype = *p++;
@@ -66,9 +58,6 @@ int tls1_process_heartbeat(SSL *s)
 	{
 		unsigned char *buffer, *bp;
 		int r;
-
-		fprintf(stderr, "%s [TLS1_HB_REQUEST]: I AM HERE!\n", __func__);
-
 
 		/* Allocate memory for the response, size is 1 bytes
 		 * message type, plus 2 bytes payload length, plus
@@ -100,8 +89,6 @@ int tls1_process_heartbeat(SSL *s)
 	else if (hbtype == TLS1_HB_RESPONSE)
 		{
 		unsigned int seq;
-
-		fprintf(stderr, "%s [TLS1_HB_RESPONSE]: I AM HERE!\n", __func__);
 
 		/* We only send sequence numbers (2 bytes unsigned int),
 		 * and 16 random bytes, so we just try to read the
