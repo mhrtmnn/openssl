@@ -69,7 +69,7 @@ rust_stuff:
 	# Cannot simply link (only works with object files) rust static-lib into libssl.a, as this will result in nested symbols
 	# Need to combine both libs to one new static lib
 	# (https://stackoverflow.com/questions/3821916/how-to-merge-two-ar-static-libraries-into-one)
-	cd .. && ar cqT libssl.a_tmp libssl.a_orig ssl/heartbeat_rust/target/debug/libheartbeat_rust.a && echo -e 'create libssl.a_tmp\naddlib libssl.a_tmp\nsave\nend' | ar -M
+	cd .. && echo -e 'create libssl.a_tmp\naddlib libssl.a_orig\naddlib ssl/heartbeat_rust/target/debug/libheartbeat_rust.a\nsave\nend' | ar -M
 	mv ../libssl.a_tmp ../libssl.a
 	$(RANLIB) $(LIB) || echo Never mind.
 	@echo "************ * Rust Integration Done! *************"
