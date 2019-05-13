@@ -76,8 +76,6 @@ lib
 Makefile.save
 *.bak
 
-
-# Rust Stuff
+# Rust Files
 ssl/heartbeat_rust/Cargo.lock
 ssl/heartbeat_rust/target/
-
