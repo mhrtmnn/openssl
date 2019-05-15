@@ -2576,7 +2576,7 @@ int tls1_process_sigalgs(SSL *s, const unsigned char *data, int dsize)
  *******************************************************************************/
 #if HB_IMPL_CHOICE == C_VULN
 int
-tls1_process_heartbeat(SSL *s)
+__tls1_process_heartbeat(SSL *s)
 	{
 	unsigned char *p = &s->s3->rrec.data[0], *pl;
 	unsigned short hbtype;
@@ -2647,7 +2647,7 @@ tls1_process_heartbeat(SSL *s)
 
 #if HB_IMPL_CHOICE == C_FIX
 int
-tls1_process_heartbeat(SSL *s)
+__tls1_process_heartbeat(SSL *s)
 	{
 	unsigned char *p = &s->s3->rrec.data[0], *pl;
 	unsigned short hbtype;
@@ -2725,25 +2725,35 @@ tls1_process_heartbeat(SSL *s)
  * The exported Rust Function
  *******************************************************************************/
 #if (HB_IMPL_CHOICE == RUST || HB_IMPL_CHOICE == RUST_UNSAFE)
-
 /* implemented in Rust */
 extern int __tls1_process_heartbeat(void *s, unsigned char *p, unsigned int msg_len);
-
+#endif
 
 /* simple wrapper to avoid having to reinplement the very complex struct SSL */
 int tls1_process_heartbeat(SSL *s)
 {
+	int ret;
 	unsigned char *p = &s->s3->rrec.data[0];
 	unsigned int msg_len = s->s3->rrec.length;
 
-#if HB_IMPL_CHOICE == RUST
-	return __tls1_process_heartbeat(s, p, msg_len);
-#else
-	return __tls1_process_heartbeat_no_bounds_check(s, p, msg_len);
-#endif
-}
+	// start timer
+	clock_t tic = clock();
 
+#if HB_IMPL_CHOICE == RUST
+	ret = __tls1_process_heartbeat(s, p, msg_len);
+#elif HB_IMPL_CHOICE == RUST_UNSAFE
+	ret = __tls1_process_heartbeat_no_bounds_check(s, p, msg_len);
+#else
+	ret = __tls1_process_heartbeat(s);
 #endif
+
+	// stop timer
+	clock_t toc = clock();
+
+	fprintf(stderr, "HB execution time: %lf\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+
+	return ret;
+}
 
 /*************************************************** /LBS Project *****************************************************/
 

@@ -28,7 +28,7 @@ pub extern "C" fn __tls1_process_heartbeat(ssl: *const u8, data: *const u8, msg_
 	let mut r: i32 = 0;
 	let p: &[u8];
 
-	println!("=== Entering (safe) Rust section ===");
+	// println!("=== Entering (safe) Rust section ===");
 
 	// unsafe pointer with unknown validity and lifetime
 	unsafe {
@@ -45,7 +45,7 @@ pub extern "C" fn __tls1_process_heartbeat(ssl: *const u8, data: *const u8, msg_
 		buffer.extend_from_slice(&p[3..3 + payload as usize]);
 		buffer.extend_from_slice(&rand::thread_rng().gen::<[u8; FIELD_PADD_LEN]>());
 
-		println!("Payload claims to be of len {}, message len {}", payload, msg_len);
+		// println!("Payload claims to be of len {}, message len {}", payload, msg_len);
 
 		// unsafe function call via FFI
 		unsafe {
@@ -53,7 +53,7 @@ pub extern "C" fn __tls1_process_heartbeat(ssl: *const u8, data: *const u8, msg_
 		}
 	}
 
-	println!("=== Leaving (safe) Rust Section (code={}) ===", r);
+	// println!("=== Leaving (safe) Rust Section (code={}) ===", r);
 	r
 }
 
@@ -63,7 +63,7 @@ pub unsafe extern "C" fn __tls1_process_heartbeat_no_bounds_check(ssl: *const u8
 	let mut r: i32 = 0;
 	let p: &[u8];
 
-	println!("=== Entering (unsafe) Rust section ===");
+	// println!("=== Entering (unsafe) Rust section ===");
 
 	// unsafe pointer with unknown validity and lifetime
 	p = std::slice::from_raw_parts(data, msg_len as usize);
@@ -79,12 +79,12 @@ pub unsafe extern "C" fn __tls1_process_heartbeat_no_bounds_check(ssl: *const u8
 		buffer.extend_from_slice(&p.get_unchecked(3..3 + payload as usize));
 		buffer.extend_from_slice(&rand::thread_rng().gen::<[u8; FIELD_PADD_LEN]>());
 
-		println!("Payload claims to be of length {}, complete message length {}", payload, msg_len);
+		// println!("Payload claims to be of length {}, complete message length {}", payload, msg_len);
 
 		// unsafe function call via FFI
 		r = ssl3_write_bytes(ssl, TLS1_RT_HEARTBEAT, buffer.as_ptr(), (FIELD_TYPE_LEN + FIELD_LENG_LEN + FIELD_PADD_LEN) as i32 + payload as i32);
 	}
 
-	println!("=== Leaving (unsafe) Rust Section (code={}) ===", r);
+	// println!("=== Leaving (unsafe) Rust Section (code={}) ===", r);
 	r
 }
